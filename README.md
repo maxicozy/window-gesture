@@ -39,3 +39,8 @@ while moving a `closed` hand downwards will cause all currently selected windows
 ![Gesture-onepager](https://user-images.githubusercontent.com/57222054/122685831-2a8a1680-d20e-11eb-9b0d-a8adc4fd7dff.png)
 
 
+
+
+# How it work
+
+
