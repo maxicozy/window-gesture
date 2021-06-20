@@ -17,8 +17,8 @@ Then install the necessary dependencies with `npm i`
 
 ## Used Gestures
 
-Using the ```point``` gesture, the windows can be selected individually by moving the 
-hand currently performing the `point` gesture to the four corners of the captured video.
+The windows can be selected individually, by moving the 
+hand currently performing handtrack.js' `point` gesture to the four corners of the captured video.
 
 
 Corners and Windows correspond as so:
