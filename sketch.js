@@ -1,9 +1,11 @@
+// define handtrack.js specifications
 const video = document.getElementById("myvideo");
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 let trackButton = document.getElementById("trackbutton");
 let updateNote = document.getElementById("updatenote");
 
+// define images 
 let leftside;
 let rightside;
 let windowFrontLeft;
@@ -13,22 +15,38 @@ let windowBackRight;
 let doorleft;
 let doorritght;
 
+// define static width and height of the car image
 const width = 1527;
 const height = 1718;
 
-let flPos  = 362;
+// set start position for the windows 
+let flPos  = 362; 
 let blPos = 358;
 let frPos  = 362;
 let brPos = 358;
 
+// define statevalues to toggle windows properly
+let triggerA = 2;
+let triggerFL = 2;
+let triggerBL = 2;
+let triggerFR = 2;
+let triggerBR = 2;
+
+// define statevalues for window controlls toggle mode
 let flState = false;
 let blState = false;
 let frState = false;
 let brState = false;
 
-let isVideo = false;
+// define logic values for handtrack predictions and controll calculations 
+let isVideo = false; 
 let model = null;
+let sX = 0, sY = 0; // startcoordinates for the gesture system
+let xDif, yDif; // distance between startcoordinates and current hand location
+let lastState = '';
+let stateHistory = []; // array of last 4 states the system detected
 
+// handtrack.js settings
 const modelParams = {
     flipHorizontal: true, // flip e.g for video  
     maxNumBoxes: 20, // maximum number of boxes to detect
@@ -36,7 +54,7 @@ const modelParams = {
     scoreThreshold: 0.6, // confidence threshold for predictions.
 }
 
-function startVideo() {
+function startVideo() { // function to plott video
     handTrack.startVideo(video).then(function (status) {
         console.log("video started", status);
         if (status) {
@@ -49,7 +67,7 @@ function startVideo() {
     });
 }
 
-function toggleVideo() {
+function toggleVideo() { // locic behind video toggle functon
     if (!isVideo) {
         updateNote.innerText = "Starting video"
         startVideo();
@@ -61,46 +79,107 @@ function toggleVideo() {
     }
 }
 
-function runDetection() {
-  model.detect(video).then(predictions => {
-      const filteredPredictions = predictions.filter((p) => p.label === 'open' || p.label === 'closed' || p.label === 'point' || p.label === 'pinch');
+function runDetection() { // function that manages the predicted detections and handeles the window controll
+  model.detect(video).then(predictions => { 
+      const filteredPredictions = predictions.filter((p) => p.label === 'open' || p.label === 'closed' || p.label === 'point'); // filtering for function we don't need to minimize error margin
 
-      let current;
+      let current; // defining current state of the prediction model
       // ignore empty array filteredPredictions as current is undefined
       if (filteredPredictions.length === 1) current = filteredPredictions[0];
-      if (filteredPredictions.length === 2) current = filteredPredictions.sort((a, b) => a.bbox[0] < b.bbox[0])[0];
-      if (current) stateHistory.push(current.label);
-      if (stateHistory.length >= 4) stateHistory = stateHistory.slice(-4) || [];
-      console.log(stateHistory);
-      if (stateHistory.filter((e) => stateHistory[0] === e).length === 4) console.log('tada');
+      if (filteredPredictions.length === 2) current = filteredPredictions.sort((a, b) => a.bbox[0] < b.bbox[0])[0]; // evade colision if to hands are visible on cam
+      if (current) stateHistory.push(current.label); 
+      if (stateHistory.length >= 4) stateHistory = stateHistory.slice(-4) || []; // state history machine to minimize errors by unconfidence and more definite states
+      //console.log(stateHistory);
+      if (stateHistory.filter((e) => stateHistory[0] === e).length === 4) console.log('tada'); 
       
-      const vidW = document.getElementById('myvideo').width;
+      const vidW = document.getElementById('myvideo').width; // automatic video formating
       const vidH = document.getElementById('myvideo').height;
 
-      if (current) {
-
-        vX = map(current.bbox[0], 0, vidW, 0, width / 2);
-        tX = current.bbox[0];
-        vY = map(current.bbox[1], 0, vidH, 0, height / 2);
-        tY = current.bbox[1];
-
-        if (current.label === 'closed') {
-          eX = width/2;
-          eY = height/2;
-        }
-        
-        if (lastState === 'open' && current.label === 'point') {
-          startX = vX;
-          startY = vY;
+      
+      if (current) { // making sure current is defined by checking if hand is detected
+        if (stateHistory[0] != 'point' && stateHistory[1] != 'point' && stateHistory[2] != 'point' && stateHistory[3] === 'point') {
+          sX = current.bbox[0]; // setting startcoordinates when starting to point
+          sY = current.bbox[1];
         }
 
-        if (lastState === 'point' && current.label === 'open') {
-          eX += (vX - startX);
-          eY += (vY - startY);
+        if (stateHistory.includes('point')){ // as long as u are pointing the code checks if u are trying to activate or deactivate window toggles
+          if (xDif <= 30 && xDif >= -30 && yDif <= -50 && triggerA === 0){ // if ur going straight up it will select all windows
+            triggerA = 1; // case trigger to toggle it once and not consistantly
+            if (!flState || !blState || !frState || !brState){
+              flState = true;
+              blState = true;
+              frState = true;
+              brState = true;
+            }
+          }else if (xDif >= 50 && yDif <= -50 && triggerFR === 0){ // if you go in the upper right directin it will select the front right window
+            triggerFR = 1;
+            if (!frState){
+              frState = true;
+            } else {
+              frState = false;
+            }
+          }else if (xDif <= -50 && yDif <= -50 && triggerFL === 0){ // if you go in the upper left directin it will select the front left window
+            triggerFL = 1;
+            if (!flState){
+              flState = true;
+            } else {
+              flState = false;
+            }
+          }else if (xDif >= 50 && yDif >= 50 && triggerBR === 0){ // if you go in the bottom right directin it will select the back right window
+            triggerBR = 1;
+            if (!brState){
+              brState = true;
+            } else {
+              brState = false;
+            }
+          }else if (xDif <= -50 && yDif >= 50 && triggerBL === 0){ // if you go in the bottom left directin it will select the back left window
+            triggerBL = 1;
+            if (!blState){
+              blState = true;
+            } else {
+              blState = false;
+            }
+          }else if(xDif <= 30 && xDif >= -30 && yDif <= 30 && yDif >= -30){ // you can only select another window toggle when 
+            triggerA = 0;
+            triggerFL = 0;
+            triggerBL = 0;
+            triggerFR = 0;
+            triggerBR = 0;
+          }
         }
+
+        if (brState === true && current.label === 'closed' && yDif >25 && brPos <= 446){
+          brPos++;
+        } else if (brState === true && current.label === 'closed' && yDif <-25 && brPos >= 358){
+          brPos = brPos - 1;
+        }
+
+        if (blState === true && current.label === 'closed' && yDif >25 && blPos <= 446){
+          blPos++;
+        } else if (blState === true && current.label === 'closed' && yDif <-25 && blPos >= 358){
+          blPos = blPos - 1;
+        }
+
+        if (frState === true && current.label === 'closed' && yDif >25 && frPos <= 450){
+          frPos++;
+        } else if (frState === true && current.label === 'closed' && yDif <-25 && frPos >= 362){
+          frPos = frPos - 1;
+        }
+
+        if (flState === true && current.label === 'closed' && yDif >25 && flPos <= 450){
+          flPos++;
+        } else if (flState === true && current.label === 'closed' && yDif <-25 && flPos >= 362){
+          flPos = flPos - 1;
+        }
+        console.log(flPos);
+        console.log(frPos);
+        console.log(blPos);
+        console.log(brPos);
+        xDif = current.bbox[0] - sX;
+        yDif = current.bbox[1] - sY;
       }
 
-
+      
       lastState = current ? current.label : 'none';
       // console.log(predictions);
       model.renderPredictions(predictions, canvas, context, video);
@@ -109,6 +188,14 @@ function runDetection() {
       }
   });
 }
+
+// Load the model.
+handTrack.load(modelParams).then(lmodel => {
+  // detect objects in the image.
+  model = lmodel
+  updateNote.innerText = "Loaded Model!"
+  trackButton.disabled = false
+});
 
 // Load the model.
 handTrack.load(modelParams).then(lmodel => {
@@ -150,13 +237,13 @@ function draw() {
     fill(200);
   }
   ellipse(width/2-20, height/2+80-20, 20, 20);
-  if(blState) {
+  if(frState) {
     fill(200,0,0);
   } else {
     fill(200);
   }
   ellipse(width/2+20, height/2+80-20, 20, 20);
-  if(frState) {
+  if(blState) {
     fill(200,0,0);
   } else {
     fill(200);
