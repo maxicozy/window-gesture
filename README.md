@@ -11,9 +11,8 @@ The different gestures are recognized and tracked by handtrack.js
 
 ## Installation
 
-Download or clone the Code, Unzip the folder and enter the folder in your console
-
-Then install the necessary dependencies with `npm i`
+Download or clone the Code, Unzip the folder and enter the folder in your console.
+For convenience, loading the html file on a live server is recommended, especially for development purposes
 
 ## Used Gestures
 
