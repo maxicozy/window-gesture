@@ -139,7 +139,7 @@ function runDetection() { // function that manages the predicted detections and 
             } else {
               blState = false;
             }
-          }else if(xDif <= 30 && xDif >= -30 && yDif <= 30 && yDif >= -30){ // you can only select another window toggle when 
+          }else if(xDif <= 30 && xDif >= -30 && yDif <= 30 && yDif >= -30){ // you can only select another window toggle when you go back somewhere arround the middle
             triggerA = 0;
             triggerFL = 0;
             triggerBL = 0;
@@ -147,8 +147,9 @@ function runDetection() { // function that manages the predicted detections and 
             triggerBR = 0;
           }
         }
-
-        if (brState === true && current.label === 'closed' && yDif >25 && brPos <= 446){
+        
+        // logics for grabbing the selected windows with the close gesture and pulling it up or down
+        if (brState === true && current.label === 'closed' && yDif >25 && brPos <= 446){ 
           brPos++;
         } else if (brState === true && current.label === 'closed' && yDif <-25 && brPos >= 358){
           brPos = brPos - 1;
@@ -171,16 +172,12 @@ function runDetection() { // function that manages the predicted detections and 
         } else if (flState === true && current.label === 'closed' && yDif <-25 && flPos >= 362){
           flPos = flPos - 1;
         }
-        console.log(flPos);
-        console.log(frPos);
-        console.log(blPos);
-        console.log(brPos);
-        xDif = current.bbox[0] - sX;
+        xDif = current.bbox[0] - sX; //calculating the distance between the startcoordinates and you current hand location
         yDif = current.bbox[1] - sY;
       }
 
       
-      lastState = current ? current.label : 'none';
+      lastState = current ? current.label : 'none'; // update for the statehistory
       // console.log(predictions);
       model.renderPredictions(predictions, canvas, context, video);
       if (isVideo) {
@@ -205,6 +202,7 @@ handTrack.load(modelParams).then(lmodel => {
   trackButton.disabled = false
 });
 
+// loading images
 function preload() {
   leftside = loadImage('./src/car-left-side.png');
   rightside = loadImage('./src/car-right-side.png');
@@ -220,6 +218,7 @@ function setup() {
   createCanvas(width, height);
 }
 
+// drawing the images and selection display on the canvas
 function draw() {
   noStroke();
   background(220);
