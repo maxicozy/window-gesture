@@ -36,3 +36,5 @@ Then, moving a hand performing the `closed` gesture upwards will close all selec
 while moving a `closed` hand downwards will cause all currently selected windows to open.
 
 
+[GESTURE-onepager.pdf](https://github.com/maxicozy/window-gesture/files/6682950/GESTURE-onepager.pdf)
+
