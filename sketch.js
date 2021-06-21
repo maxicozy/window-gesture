@@ -151,26 +151,26 @@ function runDetection() { // function that manages the predicted detections and 
         // logics for grabbing the selected windows with the close gesture and pulling it up or down
         if (brState === true && current.label === 'closed' && yDif >25 && brPos <= 446){ 
           brPos++;
-        } else if (brState === true && current.label === 'closed' && yDif <-25 && brPos >= 358){
-          brPos = brPos - 1;
+        } else if (brState === true && current.label === 'closed' && yDif < 25 && brPos >= 358){
+          brPos--;
         }
 
         if (blState === true && current.label === 'closed' && yDif >25 && blPos <= 446){
           blPos++;
-        } else if (blState === true && current.label === 'closed' && yDif <-25 && blPos >= 358){
-          blPos = blPos - 1;
+        } else if (blState === true && current.label === 'closed' && yDif < 25 && blPos >= 358){
+          blPos--;
         }
 
         if (frState === true && current.label === 'closed' && yDif >25 && frPos <= 450){
           frPos++;
-        } else if (frState === true && current.label === 'closed' && yDif <-25 && frPos >= 362){
-          frPos = frPos - 1;
+        } else if (frState === true && current.label === 'closed' && yDif < 25 && frPos >= 362){
+          frPos--;
         }
 
         if (flState === true && current.label === 'closed' && yDif >25 && flPos <= 450){
           flPos++;
-        } else if (flState === true && current.label === 'closed' && yDif <-25 && flPos >= 362){
-          flPos = flPos - 1;
+        } else if (flState === true && current.label === 'closed' && yDif < 25 && flPos >= 362){
+          flPos--;
         }
         xDif = current.bbox[0] - sX; //calculating the distance between the startcoordinates and you current hand location
         yDif = current.bbox[1] - sY;
