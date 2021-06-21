@@ -2,6 +2,10 @@
 
 is a small concept and prototype for controlling windows in a car with gestures
 
+## Concept video
+
+https://user-images.githubusercontent.com/57222054/122724947-c2bae680-d274-11eb-8ada-cb01026c4079.mp4
+
 ## Used Software
 
 To test the gesture control, we used some illustrations of a car rendered in p5.js, 
@@ -34,5 +38,9 @@ Corners and Windows correspond as so:
 
 Then, moving a hand performing the `closed` gesture upwards will close all selected windows, 
 while moving a `closed` hand downwards will cause all currently selected windows to open.
+
+
+![Gesture-onepager](https://user-images.githubusercontent.com/57222054/122685831-2a8a1680-d20e-11eb-9b0d-a8adc4fd7dff.png)
+
 
 
